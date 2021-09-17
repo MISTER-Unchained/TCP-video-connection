@@ -8,7 +8,7 @@ PORT = 7846
 total_data_count = 0
 
 def data_handler(conn, addr, data):
-    print(data)
+    pass
 
 def socket_loop():
     global total_data_count
@@ -27,16 +27,17 @@ def socket_loop():
                         rawdata = conn.recv(1024)
                         if not rawdata:
                             break
-                        print(rawdata)
-                        data = data + rawdata.decode("utf-8")
-                    data_handler(conn, addr, data)
+                        decoded_data = rawdata.decode("utf-8")
+                        data = data + decoded_data
+                        print(len(data))
                     total_data_count += len(data)
+                    data_handler(conn, addr, data)
                     data = ""
 
 def data_log():
     global total_data_count
     while True:
-        print(f"received {total_data_count}bytes per second")
+        # print(f"received {total_data_count}bytes per second")
         total_data_count = 0
         time.sleep(1)
 
