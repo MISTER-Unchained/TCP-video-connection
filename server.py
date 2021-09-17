@@ -7,6 +7,13 @@ PORT = 7846
 
 total_data_count = 0
 
+
+def check_data_end(data):
+    if data[-3:] == "END":
+        return True
+    else: 
+        return False
+
 def data_handler(conn, addr, data):
     pass
 
@@ -25,19 +32,22 @@ def socket_loop():
                 while True:
                     while True:
                         rawdata = conn.recv(1024)
-                        if not rawdata:
-                            break
                         decoded_data = rawdata.decode("utf-8")
                         data = data + decoded_data
-                        print(len(data))
-                    total_data_count += len(data)
-                    data_handler(conn, addr, data)
+                        if not rawdata:
+                            break
+                        elif check_data_end(decoded_data):
+                            break
+                    # Doesn't exit while loop for some reason
+                    total_data_count += len(data[:-3])
+                    data_handler(conn, addr, data[:-3])
                     data = ""
 
 def data_log():
     global total_data_count
     while True:
-        # print(f"received {total_data_count}bytes per second")
+        data_count_neat = round(total_data_count/1000)
+        print(f"received {data_count_neat} kilobytes per second")
         total_data_count = 0
         time.sleep(1)
 

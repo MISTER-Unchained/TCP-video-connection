@@ -29,9 +29,10 @@ def read_loop():
 def send_loop():
     global byte_im
     while True:
-        tosend = (str(byte_im)).encode('utf8')
+        tosend_raw = str(byte_im) + "END"
+        tosend = tosend_raw.encode('utf-8')
         s.sendall(tosend)
-        time.sleep(0.5)
+        time.sleep(0.04)
 
 p1 = mp.Thread(target=read_loop)
 p2 = mp.Thread(target=send_loop)
