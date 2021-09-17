@@ -3,15 +3,15 @@ import socket
 import multiprocessing as mp
 import time
 
-cap = cv2.VideoCapture(2)
+cap = cv2.VideoCapture(1)
 
 HOST = "localhost"
 PORT = 7846
 
 otherdata = "hi there"
 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.connect((HOST, PORT))
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((HOST, PORT))
 
 while True:
     ret, frame = cap.read()
@@ -23,11 +23,11 @@ while True:
     c = cv2.waitKey(1)
     if c == 27:
         break
-    tosend = str([otherdata, str(byte_im)])
-    with open("empty.txt", "w+") as f:
-        f.write(tosend)
-    s.sendall(tosend.encode("utf-8"))
-    time.sleep(2)
+    tosend = (str([otherdata, str(byte_im)])).encode('utf8')
+    # with open("empty.txt", "w+") as f:
+    #     f.write(tosend)
+    s.sendall(tosend)
 
+s.close
 cap.release()
 cv2.destroyAllWindows()
