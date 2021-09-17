@@ -23,11 +23,9 @@ while True:
     c = cv2.waitKey(1)
     if c == 27:
         break
-    tosend = (str([otherdata, str(byte_im)])).encode('utf8')
-    # with open("empty.txt", "w+") as f:
-    #     f.write(tosend)
+    tosend = (str(byte_im)).encode('utf8')
     s.sendall(tosend)
 
-s.close
+s.close()
 cap.release()
 cv2.destroyAllWindows()

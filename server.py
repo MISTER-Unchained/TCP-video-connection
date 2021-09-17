@@ -27,6 +27,7 @@ def socket_loop():
                         rawdata = conn.recv(1024)
                         if not rawdata:
                             break
+                        print(rawdata)
                         data = data + rawdata.decode("utf-8")
                     data_handler(conn, addr, data)
                     total_data_count += len(data)
