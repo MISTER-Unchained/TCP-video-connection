@@ -12,8 +12,11 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
 byte_im = None
 
+first_run = True
+
 def read_loop():
     global byte_im
+    global first_run
     while True:
         ret, frame = cap.read()
         frame = cv2.resize(frame, None, fx=1, fy=1, interpolation=cv2.INTER_AREA)
@@ -23,15 +26,18 @@ def read_loop():
         c = cv2.waitKey(1)
         if c == 27:
             break
+        if first_run:
+            first_run = False
 
 
 
 def send_loop():
     global byte_im
+    global first_run
     while True:
-        tosend_raw = str(byte_im) + "END"
-        tosend = tosend_raw.encode('utf-8')
-        s.sendall(tosend)
+        if first_run:
+            continue
+        s.sendall(byte_im)
         time.sleep(0.04)
 
 p1 = mp.Thread(target=read_loop)
