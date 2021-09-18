@@ -3,7 +3,7 @@ import socket
 import threading as mp
 import time
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 HOST = "localhost"
 PORT = 7846

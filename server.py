@@ -40,13 +40,11 @@ def socket_loop():
                 while True:
                     while True:
                         rawdata = conn.recv(1024)
-                        decoded_data = rawdata
-                        data = data + decoded_data
+                        data = data + rawdata
                         if not rawdata:
                             break
-                        elif check_data_end(decoded_data):
+                        elif check_data_end(data):
                             break
-                    # Doesn't exit while loop for some reason
                     total_data_count += len(str(data))
                     data_handler(conn, addr, data)
                     data = bytes()
