@@ -8,6 +8,8 @@ cap = cv2.VideoCapture(0)
 HOST = "localhost"
 PORT = 7846
 
+seconds_per_frame = 0.25
+
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
 byte_im = None
@@ -38,7 +40,7 @@ def send_loop():
         if first_run:
             continue
         s.sendall(byte_im)
-        time.sleep(0.04)
+        time.sleep(seconds_per_frame)
 
 p1 = mp.Thread(target=read_loop)
 p2 = mp.Thread(target=send_loop)

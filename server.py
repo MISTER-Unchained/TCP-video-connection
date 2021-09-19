@@ -8,17 +8,22 @@ import flask
 HOST = "localhost"
 PORT = 7846
 
+seconds_per_frame = 0.25
+
 total_data_count = 0
 
 with open("no-conn.jpg", "rb+") as f:
     global_image = f.read()
 
 def check_data_end(data):
-    data = str(data)
-    if data[-9:] == "\\xff\\xd9'":
-        return True
-    else: 
-        return False
+    for i in range(0, len(data), 1):
+        # print(data[i:i+8])
+        if data[i:i+8] == b"\xff\xd9":
+            return True, i
+        else: 
+            continue
+    return False, 0
+
 
 
 def data_handler(conn, addr, data):
@@ -27,7 +32,8 @@ def data_handler(conn, addr, data):
 
 def socket_loop():
     global total_data_count
-    data = bytes()
+    current_frame = bytes()
+    next_frame = bytes()
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((HOST, PORT))
@@ -39,15 +45,19 @@ def socket_loop():
                 print(f"Connected by {addr}")
                 while True:
                     while True:
-                        rawdata = conn.recv(1024)
-                        data = data + rawdata
+                        rawdata = conn.recv(4096)
+                        data_end, pos = check_data_end(rawdata)
+                        if data_end:
+                            current_frame += rawdata[:pos+10]
+                            next_frame += rawdata[pos+10:]
+                            break
+                        else: current_frame += rawdata
                         if not rawdata:
                             break
-                        elif check_data_end(data):
-                            break
-                    total_data_count += len(str(data))
-                    data_handler(conn, addr, data)
-                    data = bytes()
+                    total_data_count += len(str(current_frame))
+                    data_handler(conn, addr, current_frame)
+                    current_frame = next_frame
+                    next_frame = bytes()
 
 def data_log():
     global total_data_count
@@ -70,14 +80,12 @@ def web():
 
     def gen():
         while True:
-            time.sleep(0.1)
+            time.sleep(seconds_per_frame)
             frame = global_image
             yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
     @app.route('/video-feed/')
     def video_feed():
-        with open("client.jpg", "rb+") as f:
-            image1 = f.read()
         return flask.Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
