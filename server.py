@@ -15,6 +15,7 @@ buffer = bytes()
 conn = None
 addr = None
 conn_active = False
+global_image = bytes()
 
 with open("no-conn.jpg", "rb+") as f:
     global_image = f.read()
@@ -36,26 +37,29 @@ def clamp(num, min, max):
         return num
 
 def data_analyse():
+    global buffer
     current_frame = bytes()
-    time1 = 0
-    time2 = 0
     while True:
         if conn_active == False:
-            time.sleep(0.1)
-            print("not running")
-            break
+            time.sleep(0.2)
+            continue
         data_end, pos = check_data_end(buffer)
         if data_end:
-            current_frame += buffer[:pos+10]
-            buffer = buffer[:pos+10]
-        data_handler(conn, addr, current_frame)
+            print(buffer)
+            current_frame = buffer[:pos+10]
+            buffer = buffer[pos+9:]
+            data_handler(conn, addr, current_frame)
+
 
 def data_handler(conn, addr, data):
     global global_image
     global_image = data
+    with open("check_valid_image.jpg", "wb+") as tempf:
+        tempf.write(global_image)
 
 def socket_loop():
     global total_data_count
+    global conn_active
     buffer = bytes()
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
