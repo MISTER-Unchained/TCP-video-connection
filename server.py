@@ -41,16 +41,14 @@ def data_analyse():
     time2 = 0
     while True:
         if conn_active == False:
-            time.sleep(0.04)
+            time.sleep(0.1)
+            print("not running")
             break
-        time1 = time.time()
         data_end, pos = check_data_end(buffer)
         if data_end:
             current_frame += buffer[:pos+10]
             buffer = buffer[:pos+10]
         data_handler(conn, addr, current_frame)
-        time2 = time.time()
-        time.sleep(clamp(0, time1-time2, seconds_per_frame))
 
 def data_handler(conn, addr, data):
     global global_image
