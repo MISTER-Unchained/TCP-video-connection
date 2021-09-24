@@ -8,7 +8,7 @@ import flask
 HOST = "localhost"
 PORT = 7846
 
-seconds_per_frame = 0.25
+seconds_per_frame = 0.2
 
 total_data_count = 0
 buffer = bytes()
@@ -45,7 +45,6 @@ def data_analyse():
             continue
         data_end, pos = check_data_end(buffer)
         if data_end:
-            print(buffer)
             current_frame = buffer[:pos+10]
             buffer = buffer[pos+9:]
             data_handler(conn, addr, current_frame)
@@ -60,7 +59,7 @@ def data_handler(conn, addr, data):
 def socket_loop():
     global total_data_count
     global conn_active
-    buffer = bytes()
+    global buffer
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((HOST, PORT))

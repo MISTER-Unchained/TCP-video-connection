@@ -3,12 +3,12 @@ import socket
 import threading as mp
 import time
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 HOST = "localhost"
 PORT = 7846
 
-seconds_per_frame = 0.25
+seconds_per_frame = 0.2
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
