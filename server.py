@@ -53,8 +53,6 @@ def data_analyse():
 def data_handler(conn, addr, data):
     global global_image
     global_image = data
-    with open("check_valid_image.jpg", "wb+") as tempf:
-        tempf.write(global_image)
 
 def socket_loop():
     global total_data_count
