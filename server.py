@@ -5,7 +5,7 @@ import cv2
 import os
 import flask
 
-HOST = "localhost"
+HOST = "192.168.1.108"
 PORT = 7846
 
 seconds_per_frame = 0.2
@@ -48,6 +48,9 @@ def data_analyse():
             current_frame = buffer[:pos+10]
             buffer = buffer[pos+9:]
             data_handler(conn, addr, current_frame)
+        # if len(buffer) > 20000:
+        #     print("emtied buffer")
+        #     buffer = bytes()
 
 
 def data_handler(conn, addr, data):
@@ -84,6 +87,7 @@ def data_log():
     while True:
         data_count_neat = round(total_data_count/1000)
         print(f"received {data_count_neat} kilobytes per second")
+        print(f"current buffersize: {len(buffer)}")
         total_data_count = 0
         time.sleep(1)
 
