@@ -4,6 +4,7 @@ import threading as mp
 import cv2
 import os
 import flask
+import copy
 
 HOST = "192.168.1.108"
 PORT = 7846
@@ -16,17 +17,28 @@ conn = None
 addr = None
 conn_active = False
 global_image = bytes()
+frames_processed = 0
+times_data_checked = 0
 
 with open("no-conn.jpg", "rb+") as f:
     global_image = f.read()
 
 def check_data_end(data):
-    for i in range(0, len(data), 1):
-        if data[i:i+8] == b"\xff\xd9":
-            return True, i
-        else: 
-            continue
-    return False, 0
+    global times_data_checked
+    if len(buffer) == 0:
+        return False, 0
+    ind = data.find(b"\xff\xd9")
+    if ind == -1:
+        times_data_checked +=1
+        return False, 0
+    else:
+        times_data_checked +=1
+        return True, ind - 1
+
+def check_valid_jpg(data):
+    if data.find(b"\xff\xd9") == -1:
+        return False
+    else: return True
 
 def clamp(num, min, max):
     if num >= max:
@@ -44,6 +56,9 @@ def data_analyse():
             time.sleep(0.2)
             continue
         data_end, pos = check_data_end(buffer)
+        if len(buffer) >= 2_000_000:
+            buffer = bytes()
+            print("!emptied buffer!")
         if data_end:
             current_frame = buffer[:pos+10]
             buffer = buffer[pos+9:]
@@ -55,7 +70,9 @@ def data_analyse():
 
 def data_handler(conn, addr, data):
     global global_image
+    global frames_processed
     global_image = data
+    frames_processed += 1
 
 def socket_loop():
     global total_data_count
@@ -84,11 +101,15 @@ def socket_loop():
 
 def data_log():
     global total_data_count
+    global frames_processed
+    global times_data_checked
     while True:
         data_count_neat = round(total_data_count/1000)
-        print(f"received {data_count_neat} kilobytes per second")
+        print(f"received {data_count_neat} kilobytes per second and processed {frames_processed} frames and checked data {times_data_checked} times")
         print(f"current buffersize: {len(buffer)}")
         total_data_count = 0
+        frames_processed = 0
+        times_data_checked = 0
         time.sleep(1)
 
 def web():
@@ -105,8 +126,9 @@ def web():
     def gen():
         while True:
             time.sleep(seconds_per_frame)
-            frame = global_image
+            frame = copy.deepcopy(global_image)
             yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            
 
     @app.route('/video-feed/')
     def video_feed():
