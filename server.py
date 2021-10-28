@@ -63,6 +63,8 @@ def data_analyse():
             current_frame = buffer[:pos+10]
             buffer = buffer[pos+9:]
             data_handler(conn, addr, current_frame)
+        else: 
+            time.sleep(seconds_per_frame/2)
         # if len(buffer) > 20000:
         #     print("emtied buffer")
         #     buffer = bytes()
