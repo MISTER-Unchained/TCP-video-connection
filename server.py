@@ -5,11 +5,12 @@ import cv2
 import os
 import flask
 import copy
+import sys
 
 HOST = "192.168.1.108"
 PORT = 7846
 
-seconds_per_frame = 0.2
+seconds_per_frame = 0.05
 
 total_data_count = 0
 buffer = bytes()
@@ -107,8 +108,8 @@ def data_log():
     global times_data_checked
     while True:
         data_count_neat = round(total_data_count/1000)
-        print(f"received {data_count_neat} kilobytes per second and processed {frames_processed} frames and checked data {times_data_checked} times")
-        print(f"current buffersize: {len(buffer)}")
+        print(f"received {data_count_neat} kilobytes/s or {data_count_neat*8} kilobits/s | processed {frames_processed} frames | checked data {times_data_checked} times | current buffersize: {len(buffer)}")
+        sys.stdout.write("\033[F")
         total_data_count = 0
         frames_processed = 0
         times_data_checked = 0
