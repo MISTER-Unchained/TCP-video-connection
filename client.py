@@ -10,6 +10,8 @@ PORT = 7846
 
 seconds_per_frame = 0.2
 
+save_to_file = False
+
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
 byte_im = None
@@ -36,11 +38,15 @@ def read_loop():
 def send_loop():
     global byte_im
     global first_run
+    frame_num = 0
     while True:
         if first_run:
             continue
         s.sendall(byte_im)
         time.sleep(seconds_per_frame)
+        if save_to_file:
+            with open(f"./save/saveIm{frame_num}.jpg", "wb") as f:
+                f.write(byte_im)
 
 p1 = mp.Thread(target=read_loop)
 p2 = mp.Thread(target=send_loop)
